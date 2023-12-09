@@ -1,4 +1,4 @@
-# RPi Pico MPU6050 C library
+# RPi Pico MPU6050 C library 
 
 This project contains a stand-alone library for the Raspberry Pi Pico SDK, written in C. The library is made for the MPU6050 sensor from InvenSense. You have to download and setup the library to have it work properly.
 
