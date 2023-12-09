@@ -50,13 +50,13 @@
 
 int i2c_read_reg(struct i2c_information *i2c, const uint8_t reg, uint8_t *buf, const size_t len)
 {
-    i2c_write_blocking(i2c->instance, i2c->address, &reg, 1, true);
-    return i2c_read_blocking(i2c->instance, i2c->address, buf, len, false);
+    self->i2c.write(i2c->address, &reg, 1, true);
+    return iself->i2c.read(i2c->address, buf, len, false);
 }
 
 int i2c_write(struct i2c_information *i2c, const uint8_t data)
 {
-    return i2c_write_blocking(i2c->instance, i2c->address, &data, 1, false);
+    return self->i2c.write(i2c->address, &data, 1, false);
 }
 
 void read_raw_gyro(struct mpu6050 *self)
@@ -82,7 +82,7 @@ void read_raw_accel(struct mpu6050 *self)
 inline static void i2c_write_u16_inline(struct i2c_information *i2c, uint8_t reg, uint16_t value)
 {
     uint8_t data[3] = {reg, (value >> 8), (value & 0xFF)};
-    i2c_write_blocking(i2c->instance, i2c->address, data, 3, false);
+    self->i2c.write(i2c->address, data, 3, false);
 }
 
 inline static void i2c_write_bit_in_reg_inline(struct i2c_information *i2c, uint8_t reg, uint8_t pos, uint8_t state)
@@ -100,13 +100,14 @@ inline static void i2c_write_bit_in_reg_inline(struct i2c_information *i2c, uint
     }
 
     uint8_t data[2] = {reg, reg_value};
-    i2c_write_blocking(i2c->instance, i2c->address, data, 2, false);
+    self->i2c.write(i2c->address, data, 2, false);
 }
 
-struct mpu6050 mpu6050_init(i2c_inst_t *i2c_instance, const uint8_t address)
+struct mpu6050 mpu6050_init(i2c_read_t read, i2c_write_t write, const uint8_t address)
 {
     struct mpu6050 mpu6050;
-    mpu6050.i2c.instance = i2c_instance;
+    mpu6050.i2c.read = read;
+    mpu6050.i2c.write = write;
     mpu6050.i2c.address = address;
 
     mpu6050.calibration_data.dg.x = 0;
@@ -223,7 +224,7 @@ void mpu6050_set_scale(struct mpu6050 *self, enum MPU6050_SCALE scale)
     gyro_config |= (scale << 3);
 
     uint8_t data[2] = {GYRO_CONFIG, gyro_config};
-    i2c_write_blocking(self->i2c.instance, self->i2c.address, data, 2, false);
+    self->i2c.write(self->i2c.address, data, 2, false);
 }
 
 void mpu6050_set_range(struct mpu6050 *self, enum MPU6050_RANGE range)
@@ -251,7 +252,7 @@ void mpu6050_set_range(struct mpu6050 *self, enum MPU6050_RANGE range)
     accel_config |= (range << 3);
 
     uint8_t data[2] = {ACCEL_CONFIG, accel_config};
-    i2c_write_blocking(self->i2c.instance, self->i2c.address, data, 2, false);
+    self->i2c.write(self->i2c.address, data, 2, false);
 }
 
 void mpu6050_set_clock_source(struct mpu6050 *self, enum MPU6050_CLOCK_SOURCE clock_source)
@@ -262,7 +263,7 @@ void mpu6050_set_clock_source(struct mpu6050 *self, enum MPU6050_CLOCK_SOURCE cl
     power_managment_1 |= clock_source;
 
     uint8_t data[2] = {PWR_MGMT_1, power_managment_1};
-    i2c_write_blocking(self->i2c.instance, self->i2c.address, data, 2, false);
+    self->i2c.write(self->i2c.address, data, 2, false);
 }
 
 void mpu6050_set_sleep_enabled(struct mpu6050 *self, uint8_t state)
@@ -277,7 +278,7 @@ void mpu6050_set_sleep_enabled(struct mpu6050 *self, uint8_t state)
         data[1] = 0;
     }
 
-    i2c_write_blocking(self->i2c.instance, self->i2c.address, data, 2, false);
+    self->i2c.write(self->i2c.address, data, 2, false);
 }
 
 uint8_t mpu6050_who_am_i(struct mpu6050 *self)
@@ -548,7 +549,7 @@ void mpu6050_set_dhpf_mode(struct mpu6050 *self, enum MPU6050_DHPF dhpf)
     value &= 0xF8;
     value |= dhpf;
     uint8_t data[2] = {ACCEL_CONFIG, value};
-    i2c_write_blocking(self->i2c.instance, self->i2c.address, data, 2, false);
+    self->i2c.write(self->i2c.address, data, 2, false);
 }
 
 void mpu6050_set_dlpf_mode(struct mpu6050 *self, enum MPU6050_DLPF dlpf)
@@ -558,41 +559,41 @@ void mpu6050_set_dlpf_mode(struct mpu6050 *self, enum MPU6050_DLPF dlpf)
     value &= 0xF8;
     value |= dlpf;
     uint8_t data[2] = {CONFIG, value};
-    i2c_write_blocking(self->i2c.instance, self->i2c.address, data, 2, false);
+    self->i2c.write(self->i2c.address, data, 2, false);
 }
 
 void mpu6050_set_motion_detection_threshold(struct mpu6050 *self, uint8_t threshold)
 {
     uint8_t data[2] = {MOT_THRESHOLD, threshold};
-    i2c_write_blocking(self->i2c.instance, self->i2c.address, data, 2, false);
+    self->i2c.write(self->i2c.address, data, 2, false);
 }
 
 void mpu6050_set_motion_detection_duration(struct mpu6050 *self, uint8_t duration)
 {
     uint8_t data[2] = {MOT_DURATION, duration};
-    i2c_write_blocking(self->i2c.instance, self->i2c.address, data, 2, false);
+    self->i2c.write(self->i2c.address, data, 2, false);
 }
 
 void mpu6050_set_zero_motion_detection_threshold(struct mpu6050 *self, uint8_t threshold)
 {
     uint8_t data[2] = {ZMOT_THRESHOLD, threshold};
-    i2c_write_blocking(self->i2c.instance, self->i2c.address, data, 2, false);
+    self->i2c.write(self->i2c.address, data, 2, false);
 }
 
 void mpu6050_set_zero_motion_detection_duration(struct mpu6050 *self, uint8_t duration)
 {
     uint8_t data[2] = {ZMOT_DURATION, duration};
-    i2c_write_blocking(self->i2c.instance, self->i2c.address, data, 2, false);
+    self->i2c.write(self->i2c.address, data, 2, false);
 }
 
 void mpu6050_set_free_fall_detection_threshold(struct mpu6050 *self, uint8_t threshold)
 {
     uint8_t data[2] = {FF_THRESHOLD, threshold};
-    i2c_write_blocking(self->i2c.instance, self->i2c.address, data, 2, false);
+    self->i2c.write(self->i2c.address, data, 2, false);
 }
 
 void mpu6050_set_free_fall_detection_duration(struct mpu6050 *self, uint8_t duration)
 {
     uint8_t data[2] = {FF_DURATION, duration};
-    i2c_write_blocking(self->i2c.instance, self->i2c.address, data, 2, false);
+    self->i2c.write(self->i2c.address, data, 2, false);
 }

@@ -20,8 +20,6 @@
  */
 #ifndef MPU6050_H_
 #define MPU6050_H_
-#include "pico/stdlib.h"
-#include "hardware/i2c.h"
 
 #define MPU6050_ADDRESS_A0_VCC 0x69
 #define MPU6050_ADDRESS_A0_GND 0x68
@@ -31,11 +29,15 @@ extern "C"
 {
 #endif
 
+typedef void(*i2c_read_t)(uint8_t address, uint8_t* buf, uint16_t len, bool nostop);
+typedef void(*i2c_write_t)(uint8_t address, uint8_t* buf, uint16_t len, bool nostop);
+
 #ifndef I2C_INFORMATION_S_
 #define I2C_INFORMATION_S_
     struct i2c_information
     {
-        i2c_inst_t *instance;
+        i2c_read_t read;
+        i2c_read_t write;
         uint8_t address;
     };
 #endif
@@ -164,11 +166,12 @@ extern "C"
     /**
      * @brief Initialized a MPU6050 struct and returns it.
      * 
-     * @param i2c_inst_t* i2c_instance: I2C bus instance. Needed for multicore applications. 
+     * @param read  I2C Read function. 
+     * @param write  I2C Write function. 
      * @param uint8_t address: Slave device address, which can be modified by tying pin A0 either to GND or VCC.
      * @return struct mpu6050 
      */
-    struct mpu6050 mpu6050_init(i2c_inst_t *i2c_instance, const uint8_t address);
+    struct mpu6050 mpu6050_init(i2c_read_t read, i2c_write_t write, const uint8_t address);
 
     /**
      * @brief Checks if MPU6050 is connected to the bus and runs a default setup.
