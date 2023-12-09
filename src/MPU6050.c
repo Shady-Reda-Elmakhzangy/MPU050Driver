@@ -50,13 +50,13 @@
 
 int i2c_read_reg(struct i2c_information *i2c, const uint8_t reg, uint8_t *buf, const size_t len)
 {
-    self->i2c.write(i2c->address, &reg, 1, true);
-    return iself->i2c.read(i2c->address, buf, len, false);
+    i2c->write(i2c->address, &reg, 1, true);
+    return i2c->read(i2c->address, buf, len, false);
 }
 
 int i2c_write(struct i2c_information *i2c, const uint8_t data)
 {
-    return self->i2c.write(i2c->address, &data, 1, false);
+    return i2c->write(i2c->address, &data, 1, false);
 }
 
 void read_raw_gyro(struct mpu6050 *self)
@@ -82,7 +82,7 @@ void read_raw_accel(struct mpu6050 *self)
 inline static void i2c_write_u16_inline(struct i2c_information *i2c, uint8_t reg, uint16_t value)
 {
     uint8_t data[3] = {reg, (value >> 8), (value & 0xFF)};
-    self->i2c.write(i2c->address, data, 3, false);
+    i2c->write(i2c->address, data, 3, false);
 }
 
 inline static void i2c_write_bit_in_reg_inline(struct i2c_information *i2c, uint8_t reg, uint8_t pos, uint8_t state)
@@ -100,15 +100,16 @@ inline static void i2c_write_bit_in_reg_inline(struct i2c_information *i2c, uint
     }
 
     uint8_t data[2] = {reg, reg_value};
-    self->i2c.write(i2c->address, data, 2, false);
+    i2c->write(i2c->address, data, 2, false);
 }
 
-struct mpu6050 mpu6050_init(i2c_read_t read, i2c_write_t write, const uint8_t address)
+struct mpu6050 mpu6050_init(i2c_read_t read, i2c_write_t write, sleep_ms_t sleep_ms, const uint8_t address)
 {
     struct mpu6050 mpu6050;
     mpu6050.i2c.read = read;
     mpu6050.i2c.write = write;
     mpu6050.i2c.address = address;
+    mpu6050.sleep_ms = sleep_ms;
 
     mpu6050.calibration_data.dg.x = 0;
     mpu6050.calibration_data.dg.y = 0;
@@ -347,7 +348,7 @@ void mpu6050_calibrate_gyro(struct mpu6050 *self, uint8_t samples)
         sigmaY += self->rg.y * self->rg.y;
         sigmaZ += self->rg.z * self->rg.z;
 
-        sleep_ms(5);
+        self->sleep_ms(5);
     }
 
     self->calibration_data.dg.x = sumX / samples;

@@ -21,6 +21,9 @@
 #ifndef MPU6050_H_
 #define MPU6050_H_
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #define MPU6050_ADDRESS_A0_VCC 0x69
 #define MPU6050_ADDRESS_A0_GND 0x68
 
@@ -29,15 +32,16 @@ extern "C"
 {
 #endif
 
-typedef void(*i2c_read_t)(uint8_t address, uint8_t* buf, uint16_t len, bool nostop);
-typedef void(*i2c_write_t)(uint8_t address, uint8_t* buf, uint16_t len, bool nostop);
+typedef int (*i2c_read_t)(uint8_t address, uint8_t* buf, uint16_t len, bool nostop);
+typedef int (*i2c_write_t)(uint8_t address, const uint8_t* buf, uint16_t len, bool nostop);
+typedef void (*sleep_ms_t)(uint32_t ms);
 
 #ifndef I2C_INFORMATION_S_
 #define I2C_INFORMATION_S_
     struct i2c_information
     {
-        i2c_read_t read;
-        i2c_read_t write;
+        i2c_read_t  read;
+        i2c_write_t write;
         uint8_t address;
     };
 #endif
@@ -150,6 +154,7 @@ typedef void(*i2c_write_t)(uint8_t address, uint8_t* buf, uint16_t len, bool nos
     typedef struct mpu6050
     {
         struct i2c_information i2c;
+        sleep_ms_t sleep_ms;
         struct mpu6050_configuration config;
         struct mpu6050_calibration_data calibration_data;
         struct mpu6050_activity activity;
@@ -166,12 +171,13 @@ typedef void(*i2c_write_t)(uint8_t address, uint8_t* buf, uint16_t len, bool nos
     /**
      * @brief Initialized a MPU6050 struct and returns it.
      * 
-     * @param read  I2C Read function. 
-     * @param write  I2C Write function. 
+     * @param read      I2C Read function. 
+     * @param write     I2C Write function. 
+     * @param sleep_ms  Delay function. 
      * @param uint8_t address: Slave device address, which can be modified by tying pin A0 either to GND or VCC.
      * @return struct mpu6050 
      */
-    struct mpu6050 mpu6050_init(i2c_read_t read, i2c_write_t write, const uint8_t address);
+    struct mpu6050 mpu6050_init(i2c_read_t read, i2c_write_t write, sleep_ms_t sleep_ms, const uint8_t address);
 
     /**
      * @brief Checks if MPU6050 is connected to the bus and runs a default setup.
