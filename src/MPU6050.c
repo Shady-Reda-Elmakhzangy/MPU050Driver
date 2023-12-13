@@ -282,6 +282,34 @@ void mpu6050_set_sleep_enabled(struct mpu6050 *self, uint8_t state)
     self->i2c.write(self->i2c.address, data, 2, false);
 }
 
+void mpu6050_set_i2c_bypass_mode(struct mpu6050 *self, uint8_t state)
+{
+    uint8_t int_pin_cfg;
+    uint8_t data[2] = {INT_PIN_CFG, 0};
+    
+    i2c_read_reg(&self->i2c, INT_PIN_CFG, &int_pin_cfg, 1);
+
+    data[1] = int_pin_cfg & (~0x02);
+    data[1] |= ((state << 1) & 0x02);
+
+    self->i2c.write(self->i2c.address, data, 2, false);
+}
+
+uint8_t mpu6050_get_i2c_bypass_mode(struct mpu6050 *self)
+{
+    uint8_t int_pin_cfg;
+    
+    i2c_read_reg(&self->i2c, INT_PIN_CFG, &int_pin_cfg, 1);
+    if(int_pin_cfg & 0x02)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 uint8_t mpu6050_who_am_i(struct mpu6050 *self)
 {
     uint8_t who_am_i;

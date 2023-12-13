@@ -267,6 +267,14 @@ typedef void (*sleep_ms_t)(uint32_t ms);
     void mpu6050_set_gyroscope_measuring(struct mpu6050 *self, uint8_t state);
 
     /**
+     * @brief Enables or disables I2C bypass.
+     * 
+     * @param mpu6050_t* self: Reference to itself 
+     * @param uint8_t state: 1 to enable or 0 to disable
+     */
+    void mpu6050_set_i2c_bypass_mode(struct mpu6050 *self, uint8_t state);
+
+    /**
      * @brief Calibrates the gyroscope by taking n amounts of samples and
      * average them out to later be used in gyroscope calculations.
      * 
@@ -331,6 +339,14 @@ typedef void (*sleep_ms_t)(uint32_t ms);
      * @param uint16_t offset: Offset amount 
      */
     void mpu6050_set_accel_offset_z(struct mpu6050 *self, uint16_t offset);
+
+    /**
+     * @brief Get the status of  I2C bypass.
+     * 
+     * @param mpu6050_t* self: Reference to itself 
+     * @return uint8_t: 1 for enabled and 0 for disabled 
+     */
+    uint8_t mpu6050_get_i2c_bypass_mode(struct mpu6050 *self);
 
     /**
      * @brief Calculates and returns a pointer to the accelerometer data.
