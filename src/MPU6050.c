@@ -143,7 +143,7 @@ uint8_t mpu6050_begin(struct mpu6050 *self)
     return 1;
 }
 
-uint8_t mpu6050_event(struct mpu6050 *self)
+void mpu6050_event(struct mpu6050 *self)
 {
     self->rg.x = 0;
     self->rg.y = 0;
@@ -458,7 +458,7 @@ struct mpu6050_vectorf *mpu6050_get_gyroscope(struct mpu6050 *self)
     {
         return &self->ng;
     }
-    else if (self->ra.x != 0 || self->ra.y != 0 || self->ra.z != 0)
+    else if (self->rg.x != 0 || self->rg.y != 0 || self->rg.z != 0)
     {
         if (self->config.use_calibrate)
         {

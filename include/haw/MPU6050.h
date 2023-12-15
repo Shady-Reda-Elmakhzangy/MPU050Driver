@@ -233,7 +233,7 @@ typedef void (*sleep_ms_t)(uint32_t ms);
      * @param mpu6050_t* self: Reference to itself 
      * @return uint8_t: 1 if readings were successful, otherwise 0
      */
-    uint8_t mpu6050_event(struct mpu6050 *self);
+    void mpu6050_event(struct mpu6050 *self);
 
     /**
      * @brief Enables or disables temperature measurement readings. If state is set to 1, then
